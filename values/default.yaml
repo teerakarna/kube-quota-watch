@@ -1,0 +1,80 @@
+config:
+  defaultThreshold: 90
+  quotas: []
+    # - resourceQuotas: resource-quota-ns1
+    #   namespace: ns1
+    # - resourceQuotas: resource-quota-ns2
+    #   namespace: ns2
+    #   threshold:
+    #     default: 80
+    #     limits.cpu: 70
+    # - resourceQuotas: resource-quota-ns3
+    #   namespace: ns3
+    #   threshold:
+    #     requests.cpu: 60
+    #     limits.memory: 50
+
+cronjob:
+  schedule: "*/5 * * * *"
+  annotations: {}
+  concurrencyPolicy: "Forbid"
+  failedJobsHistoryLimit: "1"
+  successfulJobsHistoryLimit: "1"
+
+pod:
+  annotations:
+    sidecar.istio.io/inject: "false"
+  securityContext: {}
+    # fsGroup: 2000
+
+image:
+  repository: teerakarna/kube-quota-watch
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+rbac:
+  # Specifies whether RBAC should be enabled
+  enabled: true
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+    # iam.gke.io/gcp-service-account: serviceaccount@project.iam.gserviceaccount.com
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: # {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+priorityClassName: ""

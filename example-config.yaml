@@ -1,0 +1,14 @@
+defaultThreshold: 90
+quotas:
+  - resourceQuotas: resource-quota-ns1
+    namespace: ns1
+  - resourceQuotas: resource-quota-ns2
+    namespace: ns2
+    threshold:
+      default: 80
+      limits.cpu: 70
+  - resourceQuotas: resource-quota-ns3
+    namespace: ns3
+    threshold:
+      requests.cpu: 60
+      limits.memory: 50

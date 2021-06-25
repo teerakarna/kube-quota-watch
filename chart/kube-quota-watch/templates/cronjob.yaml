@@ -1,0 +1,87 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "kube-quota-watch.fullname" . }}
+  labels:
+    {{- include "kube-quota-watch.labels" . | nindent 4 }}
+  {{- with .Values.cronjob.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  schedule: "{{ .Values.cronjob.schedule }}"
+  {{- with .Values.cronjob.concurrencyPolicy }}
+  concurrencyPolicy: {{ . }}
+  {{- end }}
+  {{- with .Values.cronjob.failedJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ . }}
+  {{- end }}
+  {{- with .Values.cronjob.successfulJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ . }}
+  {{- end }}
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "kube-quota-watch.selectorLabels" . | nindent 8 }}
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "kube-quota-watch.selectorLabels" . | nindent 12 }}
+          {{- with .Values.pod.annotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ include "kube-quota-watch.serviceAccountName" . }}
+          {{- with .Values.pod.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.priorityClassName }}
+          priorityClassName: "{{ .Values.priorityClassName }}"
+          {{- end }}
+          containers:
+            - name: {{ .Chart.Name }}
+              {{- with .Values.securityContext }}
+              securityContext:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command: [ "python", "/app/kube_quota_watch.py" ]
+              args:
+                - "/app/config.yaml"
+                {{- with .Values.customArguments }}
+                {{- toYaml . | nindent 16 }}
+                {{- end }}
+              volumeMounts:
+                - name: config-yaml
+                  mountPath: "/app/config.yaml"
+                  subPath: "config.yaml"
+                  readOnly: true
+              {{- with .Values.resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+          volumes:
+            - name: config-yaml
+              configMap:
+                name: {{ include "kube-quota-watch.fullname" . }}
+                items:
+                  - key: config.yaml
+                    path: config.yaml
+                    mode: 444
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}:
+          {{- end }}

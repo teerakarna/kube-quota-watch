@@ -1,0 +1,37 @@
+{{- if .Values.rbac.enabled }}
+{{- range .Values.config.quotas }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "kube-quota-watch.fullname" $ }}
+  namespace: {{ .namespace }}
+  labels:
+    {{- include "kube-quota-watch.labels" $ | nindent 4 }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - resourcequotas
+      - resourcequotas/status
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "kube-quota-watch.fullname" $ }}
+  namespace: {{ .namespace }}
+  labels:
+    {{- include "kube-quota-watch.labels" $ | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "kube-quota-watch.fullname" $ }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "kube-quota-watch.serviceAccountName" $ }}
+    namespace: {{ $.Release.Namespace }}
+{{- end }}
+{{- end }}

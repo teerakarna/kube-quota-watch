@@ -1,0 +1,86 @@
+# Default values for kube-quota-watch.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+config:
+  defaultThreshold: ""
+  quotas: []
+    # - resourceQuotas: resource-quota-ns1
+    #   namespace: ns1
+    # - resourceQuotas: resource-quota-ns2
+    #   namespace: ns2
+    #   threshold:
+    #     default: 80
+    #     limits.cpu: 70
+    # - resourceQuotas: resource-quota-ns3
+    #   namespace: ns3
+    #   threshold:
+    #     requests.cpu: 60
+    #     limits.memory: 50
+
+cronjob:
+  schedule: "*/30 * * * *"
+  annotations: {}
+  concurrencyPolicy: "Forbid"
+  failedJobsHistoryLimit: "1"
+  successfulJobsHistoryLimit: "1"
+
+customArguments: []
+
+pod:
+  annotations: {}
+  securityContext:
+    # fsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 1001
+
+image:
+  repository: teerakarna/kube-quota-watch
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+rbac:
+  # Specifies whether RBAC should be enabled
+  enabled: false
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+priorityClassName: ""
